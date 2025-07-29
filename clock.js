@@ -17,24 +17,44 @@ function getGameTime() {
 function updateClock() {
     const time = getGameTime();
     document.getElementById('clock').textContent = `${time.hours}:${time.minutes}`;
-}
+let offsetMinutes = 0;
 
-// Update every real second
-setInterval(updateClock, 1000);
-updateClock();
 function getGameTime() {
     const realNow = new Date();
     const realTimeInSeconds = realNow.getTime() / 1000;
+    const gameMinutes = realTimeInSeconds / REAL_SECONDS_PER_GAME_MINUTE_DEFAULT;
+    const adjustedMinutes = gameMinutes + offsetMinutes;
 
-    const gameMinutes = realTimeInSeconds / REAL_SECONDS_PER_GAME_MINUTE;
-
-    // Add 30 minutes
-    const adjustedMinutes = gameMinutes + 30;
-
-    const gameHours = Math.floor((adjustedMinutes / 60) % 24);
-    const gameMins = Math.floor(adjustedMinutes % 60);
+    const hours = Math.floor((adjustedMinutes / 60) % 24);
+    const minutes = Math.floor(adjustedMinutes % 60);
 
     return {
-        hours: gameHours.toString().padStart(2, '0'),
-        minutes: gameMins.toString().padStart(2, '0')
+        hours: hours.toString().padStart(2, '0'),
+        minutes: minutes.toString().padStart(2, '0')
     };
+}
+
+function updateClock() {
+    const time = getGameTime();
+    document.getElementById('clock').textContent = `${time.hours}:${time.minutes}`;
+}
+
+// Add offset controls temporarily
+function addTimeButtons() {
+    const container = document.createElement('div');
+    container.id = 'time-buttons';
+    container.style.marginTop = '10px';
+
+    container.innerHTML = `
+        <button onclick="offsetMinutes += 60">+1 Hour</button>
+        <button onclick="offsetMinutes += 30">+30 Minutes</button>
+        <button onclick="removeTimeButtons()">Finish</button>
+    `;
+
+    document.body.appendChild(container);
+}
+
+// Remove the buttons
+function removeTimeButtons() {
+    const btns = document.getElementById('time-buttons');
+    if (btns) btns.remove();
