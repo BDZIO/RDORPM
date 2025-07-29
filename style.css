@@ -1,22 +1,23 @@
 body {
+    margin: 0;
     background-color: #111;
-    color: #f60;
-    font-family: 'Courier New', monospace;
+    color: white;
+    font-family: monospace;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
+    flex-direction: column;
 }
-.clock-container {
-    text-align: center;
-}
+
 #clock {
-    font-size: 60px;
-    font-weight: bold;
+    font-size: 80px;
+    color: orange;
 }
-#status {
+
+#notification {
     margin-top: 20px;
     font-size: 20px;
-    color: #ccc;
+    color: lightgreen;
+    text-align: center;
 }

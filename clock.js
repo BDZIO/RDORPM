@@ -1,43 +1,52 @@
 const REAL_SECONDS_PER_GAME_MINUTE = 6;
-let gameStartTime = new Date();
-gameStartTime.setHours(5);
-gameStartTime.setMinutes(5);
-gameStartTime.setSeconds(0);
+let gameMinutes = 5 * 60 + 5; // Start at 5:05
 
 function updateClock() {
-    const now = new Date();
-    const elapsedSeconds = Math.floor((now - gameStartTime) / 1000);
-    const gameMinutesPassed = Math.floor(elapsedSeconds / REAL_SECONDS_PER_GAME_MINUTE);
-    
-    let gameDate = new Date();
-    gameDate.setHours(5);
-    gameDate.setMinutes(5);
-    gameDate.setSeconds(0);
-    gameDate.setMinutes(gameDate.getMinutes() + gameMinutesPassed);
+    gameMinutes += 1;
+    if (gameMinutes >= 1440) gameMinutes = 0;
 
-    let hours = gameDate.getHours().toString().padStart(2, '0');
-    let minutes = gameDate.getMinutes().toString().padStart(2, '0');
-    document.getElementById('clock').textContent = `${hours}:${minutes}`;
-    
-    // Status Notifications
-    const statusEl = document.getElementById('status');
-    const h = gameDate.getHours();
-    const m = gameDate.getMinutes();
-    const total = h * 60 + m;
-    let messages = [];
+    const hours = Math.floor(gameMinutes / 60);
+    const minutes = gameMinutes % 60;
+    document.getElementById("clock").textContent =
+        String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0');
 
-    if (total >= 420 && total < 1260) messages.push("Bank is OPEN");
-    else messages.push("Bank is CLOSED");
-
-    if (total >= 420 && total < 1320) messages.push("Boat to Guarma is AVAILABLE");
-    else messages.push("Boat to Guarma is UNAVAILABLE");
-
-    if (total >= 120 && total < 1440) {
-        if (h === 2 || h === 8) messages.push(`${h}:00 Train News is currently AVAILABLE`);
-    }
-
-    statusEl.textContent = messages.join(" • ");
+    updateNotification(hours);
 }
 
-setInterval(updateClock, 1000);
+function updateNotification(hours) {
+    const note = document.getElementById("notification");
+    if (hours >= 7 && hours < 21) {
+        note.textContent = "🏦 The Bank is OPEN (7AM to 9PM)";
+    } else if (hours >= 21 || hours < 7) {
+        note.textContent = "🏦 The Bank is CLOSED";
+    }
+
+    if (hours >= 7 && hours < 22) {
+        note.textContent += "\n🛶 The boat to Guarma is AVAILABLE";
+    } else {
+        note.textContent += "\n🛶 The boat to Guarma is UNAVAILABLE";
+    }
+
+    if (hours >= 2 && hours < 24) {
+        note.textContent += "\n🚂 " + hours + "AM Train News is currently available!";
+    } else {
+        note.textContent += "\n🚂 No Train News now.";
+    }
+}
+
+function checkReset() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const timezoneOffset = -now.getTimezoneOffset() / 60;
+    if (timezoneOffset === 7 && minutes === 0 && (hours === 5 || hours === 17)) {
+        gameMinutes = 6 * 60; // Reset to 6:00 AM
+    }
+}
+
+setInterval(() => {
+    updateClock();
+    checkReset();
+}, REAL_SECONDS_PER_GAME_MINUTE * 1000);
+
 updateClock();
