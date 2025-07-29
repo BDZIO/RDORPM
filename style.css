@@ -1,0 +1,36 @@
+body {
+  background: #111;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  padding-top: 40px;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+  margin: auto;
+}
+
+.clock {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+.label {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+select {
+  padding: 5px 10px;
+  font-size: 1em;
+  margin-bottom: 20px;
+}
+
+#status-area {
+  margin-top: 30px;
+  font-size: 1.2em;
+  color: #0cf;
+  line-height: 1.5em;
+}
