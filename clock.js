@@ -39,3 +39,12 @@ function getGameTime() {
         minutes: gameMins.toString().padStart(2, '0')
     };
 }
+function getGameTime() {
+    // Set fixed in-game time
+    const gameHours = 0;
+    const gameMins = 0;
+
+    return {
+        hours: gameHours.toString().padStart(2, '0'),
+        minutes: gameMins.toString().padStart(2, '0')
+    };
