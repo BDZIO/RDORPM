@@ -1,52 +1,65 @@
-const REAL_SECONDS_PER_GAME_MINUTE = 6;
-let gameMinutes = 5 * 60 + 5; // Start at 5:05
+
+const REAL_SECONDS_PER_GAME_MINUTE_DEFAULT = 6;
+let gameStart = new Date();
+let startHour = 5;
+let startMinute = 5;
+let gameMinutesAtStart = startHour * 60 + startMinute;
+let TIME_MULTIPLIER = 60 / REAL_SECONDS_PER_GAME_MINUTE_DEFAULT;
+let note = document.getElementById("note");
+
+function getGameTime() {
+    let now = new Date();
+    let realSecondsPassed = (now - gameStart) / 1000;
+    let gameMinutesPassed = realSecondsPassed * TIME_MULTIPLIER;
+    let totalMinutes = gameMinutesAtStart + gameMinutesPassed;
+
+    // Reset to 6:00 every real 5AM and 5PM (+7 timezone)
+    let bangkokTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+    let realHour = bangkokTime.getHours();
+    let realMinute = bangkokTime.getMinutes();
+
+    if ((realHour === 5 || realHour === 17) && realMinute === 0) {
+        gameStart = new Date();
+        gameMinutesAtStart = 6 * 60;
+    }
+
+    totalMinutes %= 1440;
+    let hours = Math.floor(totalMinutes / 60) % 24;
+    let minutes = Math.floor(totalMinutes % 60);
+    return [hours, minutes];
+}
+
+function formatTime(unit) {
+    return unit < 10 ? "0" + unit : unit;
+}
 
 function updateClock() {
-    gameMinutes += 1;
-    if (gameMinutes >= 1440) gameMinutes = 0;
+    let [hours, minutes] = getGameTime();
+    document.getElementById("clock").textContent = formatTime(hours) + ":" + formatTime(minutes);
 
-    const hours = Math.floor(gameMinutes / 60);
-    const minutes = gameMinutes % 60;
-    document.getElementById("clock").textContent =
-        String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0');
+    let messages = [];
 
-    updateNotification(hours);
-}
-
-function updateNotification(hours) {
-    const note = document.getElementById("notification");
+    // Bank notification
     if (hours >= 7 && hours < 21) {
-        note.textContent = "🏦 The Bank is OPEN (7AM to 9PM)";
-    } else if (hours >= 21 || hours < 7) {
-        note.textContent = "🏦 The Bank is CLOSED";
+        messages.push("Bank is OPEN (7AM to 9PM)");
+    } else {
+        messages.push("Bank is CLOSED");
     }
 
+    // Guarma Boat notification
     if (hours >= 7 && hours < 22) {
-        note.textContent += "\n🛶 The boat to Guarma is AVAILABLE";
+        messages.push("Boat to Guarma is AVAILABLE (7AM to 10PM)");
     } else {
-        note.textContent += "\n🛶 The boat to Guarma is UNAVAILABLE";
+        messages.push("Boat to Guarma is UNAVAILABLE");
     }
 
-    if (hours >= 2 && hours < 24) {
-        note.textContent += "\n🚂 " + hours + "AM Train News is currently available!";
-    } else {
-        note.textContent += "\n🚂 No Train News now.";
+    // Train News Notification
+    if ((hours >= 2 && hours < 8) || (hours >= 14 && hours < 24)) {
+        messages.push("Train News is currently AVAILABLE");
     }
+
+    note.textContent = messages.join(" | ");
 }
 
-function checkReset() {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const timezoneOffset = -now.getTimezoneOffset() / 60;
-    if (timezoneOffset === 7 && minutes === 0 && (hours === 5 || hours === 17)) {
-        gameMinutes = 6 * 60; // Reset to 6:00 AM
-    }
-}
-
-setInterval(() => {
-    updateClock();
-    checkReset();
-}, REAL_SECONDS_PER_GAME_MINUTE * 1000);
-
+setInterval(updateClock, 1000);
 updateClock();

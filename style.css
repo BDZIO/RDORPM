@@ -1,23 +1,20 @@
+
 body {
     margin: 0;
     background-color: #111;
     color: white;
     font-family: monospace;
+    font-size: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    flex-direction: column;
 }
-
-#clock {
-    font-size: 80px;
-    color: orange;
-}
-
-#notification {
-    margin-top: 20px;
-    font-size: 20px;
-    color: lightgreen;
+.clock-container {
     text-align: center;
+}
+#note {
+    font-size: 20px;
+    margin-top: 20px;
+    color: orange;
 }
