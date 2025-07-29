@@ -1,32 +1,27 @@
 
-const REAL_SECONDS_PER_GAME_MINUTE_DEFAULT = 6;
-let gameStart = new Date();
-let startHour = 5;
-let startMinute = 5;
-let gameMinutesAtStart = startHour * 60 + startMinute;
-let TIME_MULTIPLIER = 60 / REAL_SECONDS_PER_GAME_MINUTE_DEFAULT;
-let note = document.getElementById("note");
+const REAL_SECONDS_PER_GAME_MINUTE = 6;
+const TIME_MULTIPLIER = 60 / REAL_SECONDS_PER_GAME_MINUTE;
 
-function getGameTime() {
-    let now = new Date();
-    let realSecondsPassed = (now - gameStart) / 1000;
-    let gameMinutesPassed = realSecondsPassed * TIME_MULTIPLIER;
-    let totalMinutes = gameMinutesAtStart + gameMinutesPassed;
+function getAdjustedGameMinutes() {
+    const now = new Date();
+    const bangkokNow = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+    const bangkokHour = bangkokNow.getHours();
+    const bangkokMinute = bangkokNow.getMinutes();
+    const bangkokSeconds = bangkokNow.getSeconds();
 
-    // Reset to 6:00 every real 5AM and 5PM (+7 timezone)
-    let bangkokTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
-    let realHour = bangkokTime.getHours();
-    let realMinute = bangkokTime.getMinutes();
+    const realMillis = bangkokNow.getTime();
 
-    if ((realHour === 5 || realHour === 17) && realMinute === 0) {
-        gameStart = new Date();
-        gameMinutesAtStart = 6 * 60;
-    }
+    // Calculate time since the last reset (5:00 AM or 5:00 PM UTC+7)
+    const currentResetHour = bangkokHour >= 5 && bangkokHour < 17 ? 5 : 17;
+    const resetTime = new Date(bangkokNow);
+    resetTime.setHours(currentResetHour, 0, 0, 0);
 
-    totalMinutes %= 1440;
-    let hours = Math.floor(totalMinutes / 60) % 24;
-    let minutes = Math.floor(totalMinutes % 60);
-    return [hours, minutes];
+    const millisSinceReset = realMillis - resetTime.getTime();
+    const gameMinutesPassed = Math.floor(millisSinceReset / 1000 / REAL_SECONDS_PER_GAME_MINUTE);
+
+    // Start at 6:00 AM = 360 minutes
+    const totalGameMinutes = (360 + gameMinutesPassed) % 1440;
+    return totalGameMinutes;
 }
 
 function formatTime(unit) {
@@ -34,31 +29,34 @@ function formatTime(unit) {
 }
 
 function updateClock() {
-    let [hours, minutes] = getGameTime();
+    const totalGameMinutes = getAdjustedGameMinutes();
+    const hours = Math.floor(totalGameMinutes / 60) % 24;
+    const minutes = Math.floor(totalGameMinutes % 60);
+
     document.getElementById("clock").textContent = formatTime(hours) + ":" + formatTime(minutes);
 
-    let messages = [];
+    const messages = [];
 
-    // Bank notification
+    // Bank
     if (hours >= 7 && hours < 21) {
-        messages.push("Bank is OPEN (7AM to 9PM)");
+        messages.push("Bank is OPEN (7AM–9PM)");
     } else {
         messages.push("Bank is CLOSED");
     }
 
-    // Guarma Boat notification
+    // Guarma Boat
     if (hours >= 7 && hours < 22) {
-        messages.push("Boat to Guarma is AVAILABLE (7AM to 10PM)");
+        messages.push("Boat to Guarma is AVAILABLE (7AM–10PM)");
     } else {
         messages.push("Boat to Guarma is UNAVAILABLE");
     }
 
-    // Train News Notification
+    // Train News
     if ((hours >= 2 && hours < 8) || (hours >= 14 && hours < 24)) {
         messages.push("Train News is currently AVAILABLE");
     }
 
-    note.textContent = messages.join(" | ");
+    document.getElementById("note").textContent = messages.join(" | ");
 }
 
 setInterval(updateClock, 1000);
