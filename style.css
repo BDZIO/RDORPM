@@ -1,21 +1,29 @@
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #111;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+    background-color: #111;
+    margin: 0;
+    font-family: sans-serif;
 }
-.container {
-  text-align: center;
+
+#clock-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
-h1 {
-  font-size: 5em;
-  margin: 0;
+
+#clock {
+    font-size: 48px;
+    color: lime;
+    font-family: monospace;
+    margin-bottom: 10px;
 }
-p {
-  font-size: 1.5em;
+
+#adjustBtn,
+#time-buttons button {
+    font-size: 14px;
+    margin: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
 }

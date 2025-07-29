@@ -1,55 +1,42 @@
-let REAL_SECONDS_PER_GAME_MINUTE = 6;
-const clock = document.getElementById('clock');
-const timeMode = document.getElementById('time-mode');
-const statusArea = document.getElementById('status-area');
 
-timeMode.addEventListener('change', (e) => {
-  REAL_SECONDS_PER_GAME_MINUTE = parseFloat(e.target.value);
-});
-
-function pad(n) {
-  return String(n).padStart(2, '0');
-}
-
-function updateStatus(h, m) {
-  let statusMessages = [];
-
-  if (h >= 7 && h < 21) {
-    statusMessages.push("🏦 The bank is currently OPEN.");
-  } else {
-    statusMessages.push("🏦 The bank is currently CLOSED.");
-  }
-
-  if (h >= 7 && h < 22) {
-    statusMessages.push("⛵ The boat to Guarma is AVAILABLE.");
-  } else {
-    statusMessages.push("⛵ The boat to Guarma is UNAVAILABLE.");
-  }
-
-  if (h >= 2 && h < 8) {
-    statusMessages.push("🚂 The 2 AM Train News is currently broadcasting.");
-  } else if (h >= 8 && h < 24) {
-    statusMessages.push("🚂 The 8 AM Train News is currently broadcasting.");
-  } else {
-    statusMessages.push("🚂 Train News is off-air.");
-  }
-
-  statusArea.innerHTML = statusMessages.join("<br>");
-}
+let REAL_SECONDS_PER_GAME_MINUTE_DEFAULT = 6;
+let offsetMinutes = 0;
 
 function updateClock() {
-  const now = new Date();
-  const totalGameMinutes = (now.getTime() / 1000) / REAL_SECONDS_PER_GAME_MINUTE;
-  const gameHours = Math.floor((totalGameMinutes / 60) % 24);
-  const gameMinutes = Math.floor(totalGameMinutes % 60);
+    const now = new Date();
+    const gameMinutesTotal = Math.floor((now.getTime() / 1000 + offsetMinutes * 60) / REAL_SECONDS_PER_GAME_MINUTE_DEFAULT);
+    const gameHours = Math.floor((gameMinutesTotal / 60) % 24);
+    const gameMinutes = gameMinutesTotal % 60;
 
-  const hh = pad(gameHours);
-  const mm = pad(gameMinutes);
+    const formattedTime = [
+        gameHours.toString().padStart(2, '0'),
+        gameMinutes.toString().padStart(2, '0')
+    ].join(':');
 
-  clock.textContent = `${hh}:${mm}`;
-
-  updateStatus(gameHours, gameMinutes);
-  requestAnimationFrame(updateClock);
+    document.getElementById('clock').textContent = formattedTime;
 }
 
+function addTimeButtons() {
+    document.getElementById('adjustBtn').style.display = 'none';
+
+    const container = document.createElement('div');
+    container.id = 'time-buttons';
+    container.style.marginTop = '10px';
+
+    container.innerHTML = `
+        <button onclick="offsetMinutes += 60; updateClock()">+1 Hour</button>
+        <button onclick="offsetMinutes += 30; updateClock()">+30 Minutes</button>
+        <button onclick="removeTimeButtons()">Finish</button>
+    `;
+
+    document.body.appendChild(container);
+}
+
+function removeTimeButtons() {
+    const btns = document.getElementById('time-buttons');
+    if (btns) btns.remove();
+    document.getElementById('adjustBtn').style.display = 'inline';
+}
+
+setInterval(updateClock, 1000);
 updateClock();
