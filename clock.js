@@ -1,6 +1,5 @@
 
 const REAL_SECONDS_PER_GAME_MINUTE = 6;
-const TIME_MULTIPLIER = 60 / REAL_SECONDS_PER_GAME_MINUTE;
 
 function getAdjustedGameMinutes() {
     const now = new Date();
@@ -11,15 +10,16 @@ function getAdjustedGameMinutes() {
 
     const realMillis = bangkokNow.getTime();
 
-    // Calculate time since the last reset (5:00 AM or 5:00 PM UTC+7)
+    // Determine if we're before 5:02 PM or not
     const currentResetHour = bangkokHour >= 5 && bangkokHour < 17 ? 5 : 17;
+    const currentResetMinute = 2;
+
     const resetTime = new Date(bangkokNow);
-    resetTime.setHours(currentResetHour, 0, 0, 0);
+    resetTime.setHours(currentResetHour, currentResetMinute, 0, 0);
 
     const millisSinceReset = realMillis - resetTime.getTime();
     const gameMinutesPassed = Math.floor(millisSinceReset / 1000 / REAL_SECONDS_PER_GAME_MINUTE);
 
-    // Start at 6:00 AM = 360 minutes
     const totalGameMinutes = (360 + gameMinutesPassed) % 1440;
     return totalGameMinutes;
 }
